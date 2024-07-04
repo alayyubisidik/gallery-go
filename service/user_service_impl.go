@@ -52,22 +52,80 @@ func (service *UserServiceImpl) SignUp(ctx context.Context, request web.UserSign
 	})
 	helper.PanicIfError(err)
 
-	jwtToken, err := helper.CreateToken(user) 
+	jwtToken, err := helper.CreateToken(user)
 	helper.PanicIfError(err)
 
 	return web.AuthResponse{
-		ID: user.ID,
-		Username: user.Username,
-		FullName: user.FullName,
-		Role: user.Role,
-		Token: jwtToken,
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Role:      user.Role,
+		Token:     jwtToken,
+		CreatedAt: user.CreatedAt,
 	}
 }
 
 func (service *UserServiceImpl) SignIn(ctx context.Context, request web.UserSignInRequest) web.AuthResponse {
-	panic("err")
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	user, err := service.UserRepository.FindByUsername(ctx, service.DB, request.Username)
+	if err != nil {
+		panic(exception.NewUnauthorizedError("Invalid credentials"))
+	}
+
+	err = helper.ComparePassword(user.Password, request.Password)
+	if err != nil {
+		panic(exception.NewUnauthorizedError("Invalid credentials"))
+	}
+
+	jwtToken, err := helper.CreateToken(user)
+	if err != nil {
+		panic(err)
+	}
+
+	return web.AuthResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Role:      user.Role,
+		Token:     jwtToken,
+		CreatedAt: user.CreatedAt,
+	}
 }
 
 func (service *UserServiceImpl) Update(ctx context.Context, request web.UserUpdateRequest) web.UserResponse {
-	panic("err")
+	err := service.Validate.Struct(request)
+	helper.PanicIfError(err)
+
+	user := domain.User{
+		ID:       request.ID,
+		Username: request.Username,
+		FullName: request.FullName,
+	}
+
+	err = service.DB.Transaction(func(tx *gorm.DB) error {
+		result, err := service.UserRepository.FindById(ctx, tx, user.ID)
+		if err != nil {
+			panic(exception.NewNotFoundError("User not found"))
+		}
+
+		result, err = service.UserRepository.FindByUsername(ctx, tx, user.Username)
+		if err == nil && result.ID != 0 && result.ID != user.ID {
+			panic(exception.NewConflictError("Username is already exists"))
+		}
+
+		user, err = service.UserRepository.Update(ctx, tx, user)
+		helper.PanicIfError(err)
+
+		return nil
+	})
+	helper.PanicIfError(err)
+
+	return web.UserResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		CreatedAt: user.CreatedAt,
+	}
 }
