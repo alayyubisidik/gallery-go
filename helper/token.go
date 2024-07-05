@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 )
-
-var mySigningKey = []byte("mysecretkey")
 
 type MyCustomClaims struct {
 	ID       int    `json:"id"`
@@ -18,7 +17,21 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+func signingKey() string {
+	config := viper.New()
+	config.SetConfigFile("config.env")
+	config.AddConfigPath(".")
+
+	err := config.ReadInConfig()
+	PanicIfError(err)
+
+	mySigningKey := config.GetString("JWT_SECRET_KEY")
+
+	return mySigningKey
+}
+
 func CreateToken(user domain.User) (string, error) {
+
 	claims := MyCustomClaims{
 		user.ID,
 		user.Username,
@@ -32,7 +45,7 @@ func CreateToken(user domain.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString(mySigningKey)
+	ss, err := token.SignedString(signingKey())
 
 	return ss, err
 }
@@ -42,7 +55,7 @@ func VerifyToken(tokenString string) (*MyCustomClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signature method")
 		}
-		return mySigningKey, nil
+		return signingKey(), nil
 	})
 
 	if err != nil {

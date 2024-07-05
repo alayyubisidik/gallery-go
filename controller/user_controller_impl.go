@@ -39,7 +39,7 @@ func (controller *UserControllerImpl) SignUp(writer http.ResponseWriter, request
 		Data: authResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse, 201)
+	helper.WriteToResponseBody(writer, webResponse, http.StatusCreated)
 }
 
 func (controller *UserControllerImpl) SignIn(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -60,7 +60,7 @@ func (controller *UserControllerImpl) SignIn(writer http.ResponseWriter, request
 		Data: authResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse, 200)
+	helper.WriteToResponseBody(writer, webResponse, http.StatusOK)
 }
 
 func (controller *UserControllerImpl) SignOut(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -76,7 +76,7 @@ func (controller *UserControllerImpl) SignOut(writer http.ResponseWriter, reques
 		Data: "Signout successfully",
 	}
 
-	helper.WriteToResponseBody(writer, webResponse, 200)
+	helper.WriteToResponseBody(writer, webResponse, http.StatusOK)
 }
 
 func (controller *UserControllerImpl) CurrentUser(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -101,7 +101,7 @@ func (controller *UserControllerImpl) CurrentUser(writer http.ResponseWriter, re
 		Data: userResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse, 200)
+	helper.WriteToResponseBody(writer, webResponse, http.StatusOK)
 }
 
 func (controller *UserControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -119,5 +119,5 @@ func (controller *UserControllerImpl) Update(writer http.ResponseWriter, request
 		Data: userResponse,
 	}
 
-	helper.WriteToResponseBody(writer, webResponse, 200)
+	helper.WriteToResponseBody(writer, webResponse, http.StatusOK)
 }
