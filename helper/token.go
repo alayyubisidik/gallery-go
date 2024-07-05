@@ -17,18 +17,18 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func signingKey() string {
+func signingKey() []byte {
 	config := viper.New()
-	config.SetConfigFile("config.env")
-	config.AddConfigPath(".")
+	config.SetConfigFile("D:/project/gallery_go/config.env")
 
 	err := config.ReadInConfig()
 	PanicIfError(err)
 
 	mySigningKey := config.GetString("JWT_SECRET_KEY")
 
-	return mySigningKey
+	return []byte(mySigningKey)
 }
+
 
 func CreateToken(user domain.User) (string, error) {
 

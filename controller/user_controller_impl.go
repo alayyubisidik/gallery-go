@@ -88,7 +88,7 @@ func (controller *UserControllerImpl) CurrentUser(writer http.ResponseWriter, re
 	tokenString := tokenCookie.Value
 	claims, err := helper.VerifyToken(tokenString)
 	if err != nil {
-		panic(exception.NewUnauthorizedError(err.Error()))
+		panic(exception.NewUnauthorizedError("Unauthorized"))
 	}
 
 	userResponse := web.UserResponse{
