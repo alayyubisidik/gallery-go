@@ -1,0 +1,18 @@
+Users
+
+id (Primary Key)
+username
+full_name
+password
+created_at
+updated_at
+
+Images
+
+id (Primary Key)
+user_id (Foreign Key dari tabel Users)
+file_path (path atau URL file gambar)
+title
+description
+created_at
+updated_at
