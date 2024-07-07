@@ -1,9 +1,13 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	usercontroller "gallery_go/controllers/user_controller"
+
+	"github.com/gin-gonic/gin"
+)
 
 func InitRoute(app *gin.Engine) {
-	// _ := app
+	route := app
 
-	
-}
+	route.POST("/api/v1/users/signup", usercontroller.SignUp)
+}	

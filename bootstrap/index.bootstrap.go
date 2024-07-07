@@ -1,8 +1,20 @@
 package bootstrap
 
-// import "github.com/gin-gonic/gin"
+import (
+	appconfig "gallery_go/configs/app_config"
+	"gallery_go/database"
+	"gallery_go/routes"
+
+	"github.com/gin-gonic/gin"
+)
 
 func BootstrapApp() {
-	// app := gin.Default()
+	database.ConnectDatabase()
+
+	app := gin.Default()
+
+	routes.InitRoute(app)
+
+	app.Run(appconfig.PORT)
 
 }
