@@ -18,13 +18,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSignUpSuccess(t *testing.T) {
+func TestMain(m *testing.M) {
 	envPath, err := filepath.Abs("../.env")
 	helper.PanicIfError(err)
 	err = godotenv.Load(envPath)
 	helper.PanicIfError(err)
 
 	database.ConnectDatabase()
+	m.Run()
+}
+
+func TestSignUpSuccess(t *testing.T) {
 	app := gin.Default()
 	DeleteTestUsernames(database.DB)
 	router := InitRouteTest(app)
@@ -56,12 +60,6 @@ func TestSignUpSuccess(t *testing.T) {
 }
 
 func TestSignUpFailed(t *testing.T) {
-	envPath, err := filepath.Abs("../.env")
-	helper.PanicIfError(err)
-	err = godotenv.Load(envPath)
-	helper.PanicIfError(err)
-
-	database.ConnectDatabase()
 	app := gin.Default()
 	DeleteTestUsernames(database.DB)
 	router := InitRouteTest(app)
@@ -84,12 +82,6 @@ func TestSignUpFailed(t *testing.T) {
 }
 
 func TestSignInSuccess(t *testing.T) {
-	envPath, err := filepath.Abs("../.env")
-	helper.PanicIfError(err)
-	err = godotenv.Load(envPath)
-	helper.PanicIfError(err)
-
-	database.ConnectDatabase()
 	app := gin.Default()
 	DeleteTestUsernames(database.DB)
 	CreateUser("test", "test@gmail.com")
@@ -121,12 +113,6 @@ func TestSignInSuccess(t *testing.T) {
 }
 
 func TestSignInFailed(t *testing.T) {
-	envPath, err := filepath.Abs("../.env")
-	helper.PanicIfError(err)
-	err = godotenv.Load(envPath)
-	helper.PanicIfError(err)
-
-	database.ConnectDatabase()
 	app := gin.Default()
 	DeleteTestUsernames(database.DB)
 	CreateUser("tests", "test@gmail.com")
@@ -153,14 +139,7 @@ func TestSignInFailed(t *testing.T) {
 	fmt.Println(responseBody)
 }
 
-
 func TestCurrentUserSuccess(t *testing.T) {
-	envPath, err := filepath.Abs("../.env")
-	helper.PanicIfError(err)
-	err = godotenv.Load(envPath)
-	helper.PanicIfError(err)
-
-	database.ConnectDatabase()
 	app := gin.Default()
 	router := InitRouteTest(app)
 
@@ -184,14 +163,7 @@ func TestCurrentUserSuccess(t *testing.T) {
 	assert.Equal(t, "test@gmail.com", responseBody["data"].(map[string]any)["email"])
 }
 
-
 func TestCurrentUserFailed(t *testing.T) {
-	envPath, err := filepath.Abs("../.env")
-	helper.PanicIfError(err)
-	err = godotenv.Load(envPath)
-	helper.PanicIfError(err)
-
-	database.ConnectDatabase()
 	app := gin.Default()
 	router := InitRouteTest(app)
 
@@ -210,3 +182,35 @@ func TestCurrentUserFailed(t *testing.T) {
 
 	assert.Nil(t, responseBody["data"])
 }
+
+func TestSignOutSuccess(t *testing.T) {
+	app := gin.Default()
+	router := InitRouteTest(app)
+	
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:3000/api/v1/users/signout", nil)
+	request.Header.Add("Content-Type", "application/json")
+
+	AddJWTToCookie(request)
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+}
+
+func TestSignOutFailed(t *testing.T) {
+	app := gin.Default()
+	router := InitRouteTest(app)
+
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:3000/api/v1/users/signout", nil)
+	request.Header.Add("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 401, response.StatusCode)
+}
+
+
