@@ -5,6 +5,7 @@ import (
 	"gallery_go/database"
 	"gallery_go/exception"
 	"gallery_go/helper"
+	"gallery_go/middleware"
 	"gallery_go/models"
 	"net/http"
 
@@ -19,12 +20,12 @@ func InitRouteTest(app *gin.Engine) *gin.Engine {
 	route.POST("/api/v1/users/signup", controller.SignUp)
 	route.POST("/api/v1/users/signin", controller.SignIn)
 	route.GET("/api/v1/users/currentuser", controller.CurrentUser)
+	route.DELETE("/api/v1/users/signout", middleware.AuthMidddleware, controller.SignOut)
 
 	return route
 }	
 
 func DeleteTestUsernames(db *gorm.DB) {
-    // Hapus semua username yang berawalan "test"
     db.Exec("DELETE FROM users WHERE username LIKE 'test%'")
 }
 
