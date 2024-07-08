@@ -41,6 +41,16 @@ func GlobalErrorHandler() gin.HandlerFunc {
 				}
 
 				ctx.JSON(409, errResponse)
+			case *UnAuthorizedError:
+				errResponse := response.ErrorResponse{
+					Errors: []response.DetailError{
+						{
+							Message: e.Error(),
+						},
+					},
+				}
+
+				ctx.JSON(401, errResponse)
 			default:
 				errResponse := response.ErrorResponse{
 					Errors: []response.DetailError{

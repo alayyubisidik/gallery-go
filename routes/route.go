@@ -12,5 +12,7 @@ func InitRoute(app *gin.Engine) {
 
 	route.Use(exception.GlobalErrorHandler())
 	route.POST("/api/v1/users/signup", controller.SignUp)
+	route.POST("/api/v1/users/signin", controller.SignIn)
+	route.GET("/api/v1/users/currentuser", controller.CurrentUser)
 
 }	
