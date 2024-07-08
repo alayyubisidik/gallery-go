@@ -21,6 +21,7 @@ func InitRouteTest(app *gin.Engine) *gin.Engine {
 	route.POST("/api/v1/users/signin", controller.SignIn)
 	route.GET("/api/v1/users/currentuser", controller.CurrentUser)
 	route.DELETE("/api/v1/users/signout", middleware.AuthMidddleware, controller.SignOut)
+	route.PUT("/api/v1/users/:userId", middleware.AuthMidddleware, controller.Update)
 
 	return route
 }	
