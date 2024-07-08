@@ -4,6 +4,7 @@ import (
 	"gallery_go/database"
 	"gallery_go/exception"
 	"gallery_go/helper"
+	"time"
 
 	"gallery_go/models"
 	"gallery_go/requests"
@@ -146,5 +147,21 @@ func CurrentUser(ctx *gin.Context) {
         Data:   userResponse,
     }
 
-	ctx.JSON(200, webResponse)	
+	ctx.JSON(http.StatusOK, webResponse)	
+}
+
+func SignOut(ctx *gin.Context) {
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Unix(0, 0),
+	})
+
+	webResponse := response.WebResponse{
+		Data: "Sign out successfully",
+	}
+
+	ctx.JSON(http.StatusOK, webResponse)
 }
