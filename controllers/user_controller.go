@@ -4,6 +4,7 @@ import (
 	"gallery_go/database"
 	"gallery_go/exception"
 	"gallery_go/helper"
+	"strconv"
 	"time"
 
 	"gallery_go/models"
@@ -123,31 +124,31 @@ func CurrentUser(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"data": nil,
-		})	
+		})
 		return
 	}
 
-    claims, err := helper.VerifyToken(tokenCookie)
+	claims, err := helper.VerifyToken(tokenCookie)
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"data": nil,
-		})	
+		})
 		return
 	}
 
 	userResponse := response.UserResponse{
-        Id:       claims.ID,
-        Username: claims.Username,
-        FullName: claims.FullName,
-        Email:    claims.Email,
-		Role:    claims.Role,
-    }
+		Id:       claims.ID,
+		Username: claims.Username,
+		FullName: claims.FullName,
+		Email:    claims.Email,
+		Role:     claims.Role,
+	}
 
-    webResponse := response.WebResponse{
-        Data:   userResponse,
-    }
+	webResponse := response.WebResponse{
+		Data: userResponse,
+	}
 
-	ctx.JSON(http.StatusOK, webResponse)	
+	ctx.JSON(http.StatusOK, webResponse)
 }
 
 func SignOut(ctx *gin.Context) {
@@ -164,4 +165,57 @@ func SignOut(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, webResponse)
+}
+
+func Update(ctx *gin.Context) {
+	var userUpdateRequest requests.UserUpdateRequest
+
+	if err := ctx.ShouldBind(&userUpdateRequest); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	userId := ctx.Param("userId")
+	id, err := strconv.Atoi(userId)
+	helper.PanicIfError(err)
+
+	var existingUser models.User
+	if err := database.DB.Table("users").Where("id = ?", id).First(&existingUser).Error; err != nil {
+		ctx.Error(exception.NewNotFoundError("User not found"))
+		return
+	}
+
+	var result models.User
+	err = database.DB.Table("users").Where("username = ?", userUpdateRequest.Username).First(&result).Error
+	if err == nil && result.ID != 0 && result.ID != existingUser.ID {
+		err = exception.NewConflictError("Username is already exists")
+		ctx.Error(err)
+		return
+	}
+
+	err = database.DB.Table("users").Where("email = ?", userUpdateRequest.Email).First(&result).Error
+	if err == nil && result.ID != 0 && result.ID != existingUser.ID {
+		err = exception.NewConflictError("Email is already exists")
+		ctx.Error(err)
+		return
+	}
+
+	existingUser.Username = userUpdateRequest.Username
+	existingUser.FullName = userUpdateRequest.FullName
+	existingUser.Email = userUpdateRequest.Email
+
+	err = database.DB.Save(&existingUser).Error
+	helper.PanicIfError(err)
+
+	userResponse := response.UserResponse{
+		Id:       existingUser.ID,
+		Username: existingUser.Username,
+		FullName: existingUser.FullName,
+		Email:    existingUser.Email,
+		Role:     existingUser.Role,
+	}
+
+	ctx.JSON(http.StatusOK, response.WebResponse{
+		Data: userResponse,
+	})
 }

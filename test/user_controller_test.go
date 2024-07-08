@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
-	// "strconv"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -212,6 +212,64 @@ func TestSignOutFailed(t *testing.T) {
 
 	response := recorder.Result()
 	assert.Equal(t, 401, response.StatusCode)
+}
+
+func TestUpdateSuccess(t *testing.T) {
+	app := gin.Default()
+	DeleteTestUsernames(database.DB)
+	router := InitRouteTest(app)
+
+	user := CreateUser("test", "test@gmail.com")
+
+	requestBody := strings.NewReader(`{
+		"username": "testupdated",
+		"full_name": "Test",
+		"email": "test@gmail.com",
+		"password": "test"
+	}`)
+
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/v1/users/" + strconv.Itoa(user.ID) , requestBody)
+	request.Header.Add("Content-Type", "application/json")
+
+	AddJWTToCookie(request)
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]any
+	json.Unmarshal(body, &responseBody)
+
+	assert.Equal(t, "testupdated", responseBody["data"].(map[string]any)["username"])
+}
+
+func TestUpdateFailed(t *testing.T) {
+	app := gin.Default()
+	DeleteTestUsernames(database.DB)
+	router := InitRouteTest(app)
+
+	user := CreateUser("test", "test@gmail.com")
+
+	requestBody := strings.NewReader(`{
+		"username": "testupdated",
+		"full_name": "Test",
+		"email": "test@gmail.com",
+		"password": "test"
+	}`)
+
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/v1/users/" + strconv.Itoa(user.ID + 1) , requestBody)
+	request.Header.Add("Content-Type", "application/json")
+
+	AddJWTToCookie(request)
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
 }
 
 

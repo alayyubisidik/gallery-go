@@ -40,7 +40,7 @@ func GlobalErrorHandler() gin.HandlerFunc {
 					},
 				}
 
-				ctx.JSON(409, errResponse)
+				ctx.JSON(http.StatusConflict, errResponse)
 			case *UnAuthorizedError:
 				errResponse := response.ErrorResponse{
 					Errors: []response.DetailError{
@@ -50,7 +50,17 @@ func GlobalErrorHandler() gin.HandlerFunc {
 					},
 				}
 
-				ctx.JSON(401, errResponse)
+				ctx.JSON(http.StatusUnauthorized, errResponse)
+			case *NotFoundError:
+				errResponse := response.ErrorResponse{
+					Errors: []response.DetailError{
+						{
+							Message: e.Error(),
+						},
+					},
+				}
+
+				ctx.JSON(http.StatusNotFound, errResponse)
 			default:
 				errResponse := response.ErrorResponse{
 					Errors: []response.DetailError{
@@ -59,7 +69,7 @@ func GlobalErrorHandler() gin.HandlerFunc {
 						},
 					},
 				}
-				ctx.JSON(500, errResponse)
+				ctx.JSON(http.StatusInternalServerError, errResponse)
 			}
 
 			ctx.Abort()
