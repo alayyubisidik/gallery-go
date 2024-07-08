@@ -20,6 +20,6 @@ func BootstrapApp() {
 
 	routes.InitRoute(app)
 
-	app.Run(os.Getenv("APP_PORT"))
+	app.Run(":" + os.Getenv("PORT"))
 
 }
