@@ -1,4 +1,4 @@
-package models
+package model
 
 import "time"
 
@@ -10,4 +10,5 @@ type User struct {
 	Password  string
 	Role      string `gorm:"default:author"`
 	CreatedAt time.Time
+	Images    []Image `gorm:"foreignKey:user_id;references:id"`
 }

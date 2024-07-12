@@ -6,7 +6,7 @@ import (
 	"gallery_go/exception"
 	"gallery_go/helper"
 	"gallery_go/middleware"
-	"gallery_go/models"
+	"gallery_go/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +31,7 @@ func DeleteTestUsernames(db *gorm.DB) {
 }
 
 func AddJWTToCookie(request *http.Request) {
-	user := models.User{
+	user := model.User{
 		ID:       1,
 		Username: "test",
 		FullName: "Test",
@@ -55,11 +55,11 @@ func AddJWTToCookie(request *http.Request) {
 	request.AddCookie(cookie)
 }
 
-func CreateUser(username string, email string) models.User {
+func CreateUser(username string, email string) model.User {
 	hashedPassword, err := helper.HashPassword("test")
 	helper.PanicIfError(err)
 
-	user := models.User{
+	user := model.User{
 		Username: username,
 		FullName: "Test",
 		Email: email,
