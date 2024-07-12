@@ -2,6 +2,7 @@ package imagecontroller
 
 import (
 	"gallery_go/database"
+	"gallery_go/exception"
 	"gallery_go/helper"
 	"gallery_go/model"
 	"gallery_go/request"
@@ -9,12 +10,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 func Store(ctx *gin.Context) {
 	var imageCreateRequest request.ImageCreateRequest
 
-	if err := ctx.ShouldBind(&imageCreateRequest); err != nil {
+	if err := ctx.ShouldBindWith(&imageCreateRequest, binding.FormMultipart); err != nil {
 		ctx.Error(err)
 		return
 	}
@@ -25,13 +27,19 @@ func Store(ctx *gin.Context) {
 		Description: imageCreateRequest.Description,
 	}
 
-	fileHeader, err := helper.ValidateImageFile(ctx)
-	if err != nil {
-		ctx.Error(err)
+	var user model.User
+	if err := database.DB.Table("users").Where("id", image.UserId).First(&user).Error; err != nil {
+		ctx.Error(exception.NewNotFoundError("user not found"))
 		return
 	}
 
-	newFileName, err := helper.SaveImage(ctx, fileHeader)
+	// fileHeader, err := helper.ValidateImageFile(ctx)
+	// if err != nil {
+	// 	ctx.Error(err)
+	// 	return
+	// }
+
+	newFileName, err := helper.SaveImage(ctx, imageCreateRequest.Image)
 	helper.PanicIfError(err)
 
 	image.Image = newFileName

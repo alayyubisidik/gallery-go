@@ -14,7 +14,7 @@ import (
 func ValidateImageFile(ctx *gin.Context) (*multipart.FileHeader, error) {
 	fileHeader, err := ctx.FormFile("image")
 	if err != nil {
-		return nil, exception.NewBadRequestError("Image is required")
+		return nil, exception.NewBadRequestError("Image is requiredss")
 	}
 
 	const maxFileSize = 5 * 1024 * 1024 
