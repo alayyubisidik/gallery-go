@@ -61,6 +61,16 @@ func GlobalErrorHandler() gin.HandlerFunc {
 				}
 
 				ctx.JSON(http.StatusNotFound, errResponse)
+			case *BadRequestError:
+				errResponse := response.ErrorResponse{
+					Errors: []response.DetailError{
+						{
+							Message: e.Error(),
+						},
+					},
+				}
+
+				ctx.JSON(http.StatusBadRequest, errResponse)
 			default:
 				errResponse := response.ErrorResponse{
 					Errors: []response.DetailError{

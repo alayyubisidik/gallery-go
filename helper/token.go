@@ -2,7 +2,7 @@ package helper
 
 import (
 	"errors"
-	"gallery_go/models"
+	"gallery_go/model"
 	"os"
 	"time"
 
@@ -18,7 +18,7 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func CreateToken(user models.User) (string, error) {
+func CreateToken(user model.User) (string, error) {
 	claims := MyCustomClaims{
 		user.ID,
 		user.Username,

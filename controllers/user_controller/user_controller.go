@@ -1,4 +1,4 @@
-package controller
+package usercontroller
 
 import (
 	"gallery_go/database"
@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"gallery_go/models"
-	"gallery_go/requests"
+	"gallery_go/model"
+	"gallery_go/request"
 	"gallery_go/response"
 	"net/http"
 
@@ -16,7 +16,7 @@ import (
 )
 
 func SignUp(ctx *gin.Context) {
-	var userSingUpRequest requests.UserSignUpRequest
+	var userSingUpRequest request.UserSignUpRequest
 
 	if err := ctx.ShouldBind(&userSingUpRequest); err != nil {
 		ctx.Error(err)
@@ -26,7 +26,7 @@ func SignUp(ctx *gin.Context) {
 	hashedPassword, err := helper.HashPassword(userSingUpRequest.Password)
 	helper.PanicIfError(err)
 
-	user := models.User{
+	user := model.User{
 		Username: userSingUpRequest.Username,
 		FullName: userSingUpRequest.FullName,
 		Email:    userSingUpRequest.Email,
@@ -74,14 +74,14 @@ func SignUp(ctx *gin.Context) {
 }
 
 func SignIn(ctx *gin.Context) {
-	var userSignInRequest requests.UserSignInRequest
+	var userSignInRequest request.UserSignInRequest
 
 	if err := ctx.ShouldBind(&userSignInRequest); err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	var user models.User
+	var user model.User
 	if err := database.DB.Table("users").Where("username = ?", userSignInRequest.Username).First(&user).Error; err != nil {
 		err = exception.NewUnAuthorizedError("Invalid credentials")
 		ctx.Error(err)
@@ -168,7 +168,7 @@ func SignOut(ctx *gin.Context) {
 }
 
 func Update(ctx *gin.Context) {
-	var userUpdateRequest requests.UserUpdateRequest
+	var userUpdateRequest request.UserUpdateRequest
 
 	if err := ctx.ShouldBind(&userUpdateRequest); err != nil {
 		ctx.Error(err)
@@ -179,13 +179,13 @@ func Update(ctx *gin.Context) {
 	id, err := strconv.Atoi(userId)
 	helper.PanicIfError(err)
 
-	var existingUser models.User
+	var existingUser model.User
 	if err := database.DB.Table("users").Where("id = ?", id).First(&existingUser).Error; err != nil {
 		ctx.Error(exception.NewNotFoundError("User not found"))
 		return
 	}
 
-	var result models.User
+	var result model.User
 	err = database.DB.Table("users").Where("username = ?", userUpdateRequest.Username).First(&result).Error
 	if err == nil && result.ID != 0 && result.ID != existingUser.ID {
 		err = exception.NewConflictError("Username is already exists")

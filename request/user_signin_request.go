@@ -1,4 +1,4 @@
-package requests
+package request
 
 type UserSignInRequest struct {
 	Username string `json:"username" binding:"required"`

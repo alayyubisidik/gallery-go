@@ -1,12 +1,12 @@
 package test
 
 import (
-	controller "gallery_go/controllers"
+	usercontroller "gallery_go/controllers/user_controller"
 	"gallery_go/database"
 	"gallery_go/exception"
 	"gallery_go/helper"
 	"gallery_go/middleware"
-	"gallery_go/models"
+	"gallery_go/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,11 +17,11 @@ func InitRouteTest(app *gin.Engine) *gin.Engine {
 	route := app
 
 	route.Use(exception.GlobalErrorHandler())
-	route.POST("/api/v1/users/signup", controller.SignUp)
-	route.POST("/api/v1/users/signin", controller.SignIn)
-	route.GET("/api/v1/users/currentuser", controller.CurrentUser)
-	route.DELETE("/api/v1/users/signout", middleware.AuthMidddleware, controller.SignOut)
-	route.PUT("/api/v1/users/:userId", middleware.AuthMidddleware, controller.Update)
+	route.POST("/api/v1/users/signup", usercontroller.SignUp)
+	route.POST("/api/v1/users/signin", usercontroller.SignIn)
+	route.GET("/api/v1/users/currentuser", usercontroller.CurrentUser)
+	route.DELETE("/api/v1/users/signout", middleware.AuthMidddleware, usercontroller.SignOut)
+	route.PUT("/api/v1/users/:userId", middleware.AuthMidddleware, usercontroller.Update)
 
 	return route
 }	
@@ -30,8 +30,12 @@ func DeleteTestUsernames(db *gorm.DB) {
     db.Exec("DELETE FROM users WHERE username LIKE 'test%'")
 }
 
+func DeleteTestTitles(db *gorm.DB) {
+    db.Exec("DELETE FROM images WHERE title LIKE 'test%'")
+}
+
 func AddJWTToCookie(request *http.Request) {
-	user := models.User{
+	user := model.User{
 		ID:       1,
 		Username: "test",
 		FullName: "Test",
@@ -55,11 +59,11 @@ func AddJWTToCookie(request *http.Request) {
 	request.AddCookie(cookie)
 }
 
-func CreateUser(username string, email string) models.User {
+func CreateUser(username string, email string) model.User {
 	hashedPassword, err := helper.HashPassword("test")
 	helper.PanicIfError(err)
 
-	user := models.User{
+	user := model.User{
 		Username: username,
 		FullName: "Test",
 		Email: email,
