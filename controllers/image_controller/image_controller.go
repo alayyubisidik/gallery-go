@@ -33,12 +33,6 @@ func Store(ctx *gin.Context) {
 		return
 	}
 
-	// fileHeader, err := helper.ValidateImageFile(ctx)
-	// if err != nil {
-	// 	ctx.Error(err)
-	// 	return
-	// }
-
 	newFileName, err := helper.SaveImage(ctx, imageCreateRequest.Image)
 	helper.PanicIfError(err)
 
@@ -66,7 +60,28 @@ func Store(ctx *gin.Context) {
 		},
 	}
 
-	ctx.JSON(http.StatusOK, response.WebResponse{
+	ctx.JSON(http.StatusCreated, response.WebResponse{
 		Data: imageResponse,
+	})
+}
+
+func Delete(ctx *gin.Context) {
+	imageId := ctx.Param("imageId")
+
+	var image model.Image
+	if err := database.DB.Table("images").Where("id", imageId).First(&image).Error; err != nil {
+		ctx.Error(exception.NewNotFoundError("image not found"))
+		return
+	}	
+
+	err := helper.DeleteImage(image.Image)
+	helper.PanicIfError(err)
+
+	err = database.DB.Delete(&image).Error
+	helper.PanicIfError(err)
+
+	
+	ctx.JSON(http.StatusOK, response.WebResponse{
+		Data: "The image has been successfully deleted",
 	})
 }

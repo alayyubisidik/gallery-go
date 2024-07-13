@@ -3,6 +3,7 @@ package helper
 import (
 	"gallery_go/exception"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -47,4 +48,12 @@ func SaveImage(ctx *gin.Context, fileHeader *multipart.FileHeader) (string, erro
 	}
 
 	return newFileName, nil
+}
+
+func DeleteImage(fileName string) error {
+    filePath := fmt.Sprintf("./public/images/%s", fileName)
+    if err := os.Remove(filePath); err != nil {
+        return err
+    }
+    return nil
 }

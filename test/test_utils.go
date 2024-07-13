@@ -30,6 +30,10 @@ func DeleteTestUsernames(db *gorm.DB) {
     db.Exec("DELETE FROM users WHERE username LIKE 'test%'")
 }
 
+func DeleteTestTitles(db *gorm.DB) {
+    db.Exec("DELETE FROM images WHERE title LIKE 'test%'")
+}
+
 func AddJWTToCookie(request *http.Request) {
 	user := model.User{
 		ID:       1,

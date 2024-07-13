@@ -22,5 +22,6 @@ func InitRoute(app *gin.Engine) {
 	route.PUT("/api/v1/users/:userId", middleware.AuthMidddleware, usercontroller.Update)
 
 	route.POST("/api/v1/images", middleware.AuthMidddleware, imagecontroller.Store)
+	route.DELETE("/api/v1/images/:imageId", middleware.AuthMidddleware, imagecontroller.Delete)
 
 }	
