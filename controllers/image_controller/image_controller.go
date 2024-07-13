@@ -85,3 +85,66 @@ func Delete(ctx *gin.Context) {
 		Data: "The image has been successfully deleted",
 	})
 }
+
+func FindById(ctx *gin.Context) {
+	imageId := ctx.Param("imageId")
+
+	var image model.Image
+	if err := database.DB.Table("images").Where("id", imageId).First(&image).Error; err != nil {
+		ctx.Error(exception.NewNotFoundError("image not found"))
+		return
+	}
+
+	err := database.DB.Preload("User").First(&image, image.ID).Error
+	helper.PanicIfError(err)
+
+	imageResponse := response.ImageResponse {
+		Id: image.ID,
+		Image: image.Image,
+		Title: image.Title,
+		Description: image.Description,
+		CreatedAt: image.CreatedAt,
+		User: response.UserResponse{
+			Id: image.User.ID,
+			Username: image.User.Username,
+			FullName: image.User.FullName,
+			Email: image.User.Email,
+			Role: image.User.Role,
+			CreatedAt: image.User.CreatedAt,
+		},
+	}
+
+	ctx.JSON(http.StatusCreated, response.WebResponse{
+		Data: imageResponse,
+	})
+}
+
+func FindAll(ctx *gin.Context) {
+	var images []model.Image
+	err := database.DB.Preload("User").Find(&images).Error
+	helper.PanicIfError(err)
+
+	var imageResponses []response.ImageResponse
+	for _, image := range images {
+		imageResponse := response.ImageResponse{
+			Id:          image.ID,
+			Image:       image.Image,
+			Title:       image.Title,
+			Description: image.Description,
+			CreatedAt:   image.CreatedAt,
+			User: response.UserResponse{
+				Id:        image.User.ID,
+				Username:  image.User.Username,
+				FullName:  image.User.FullName,
+				Email:     image.User.Email,
+				Role:      image.User.Role,
+				CreatedAt: image.User.CreatedAt,
+			},
+		}
+		imageResponses = append(imageResponses, imageResponse)
+	}
+
+	ctx.JSON(http.StatusOK, response.WebResponse{
+		Data: imageResponses,
+	})
+}

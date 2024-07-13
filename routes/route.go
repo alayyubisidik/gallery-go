@@ -23,5 +23,8 @@ func InitRoute(app *gin.Engine) {
 
 	route.POST("/api/v1/images", middleware.AuthMidddleware, imagecontroller.Store)
 	route.DELETE("/api/v1/images/:imageId", middleware.AuthMidddleware, imagecontroller.Delete)
+	route.GET("/api/v1/images/:imageId", imagecontroller.FindById)
+	route.GET("/api/v1/images", imagecontroller.FindAll)
+
 
 }	
